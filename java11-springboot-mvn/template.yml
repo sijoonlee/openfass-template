@@ -1,0 +1,3 @@
+language: java11-spring-mvn
+welcome_message: |
+  You have created a function using the Springboot java11 template with maven
