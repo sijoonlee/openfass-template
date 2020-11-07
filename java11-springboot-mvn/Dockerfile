@@ -10,11 +10,7 @@ COPY . /home/app/
 
 WORKDIR /home/app
 
-RUN ls /home/app/function
-
 RUN  mvn clean package -e
-
-RUN ls /home/app/function
 
 FROM openfaas/of-watchdog:0.7.6 as watchdog
 
