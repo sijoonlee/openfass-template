@@ -12,11 +12,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.util.*;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 
 @Controller
@@ -41,7 +44,9 @@ public class ResponseController {
         if(httpServletRequest.getMethod().equalsIgnoreCase("POST")){
             try {
                 // https://stackoverflow.com/questions/8100634/get-the-post-request-body-from-httpservletrequest
-                // IOUtils.toString(request.getReader());
+                // Guava's CharStreams is marked as @Beta (unstable)
+                // I am using CharStreams since it is already imported along with Spring framework
+                // Possible alternative: IOUtils.toString(request.getReader());
                 requestBody = CharStreams.toString(httpServletRequest.getReader());
                 logger.info(requestBody);
             } catch (IOException e) {
