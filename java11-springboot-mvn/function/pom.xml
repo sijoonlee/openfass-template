@@ -36,6 +36,18 @@
 <!--            <artifactId>entrypoint</artifactId>-->
 <!--            <version>${openfaas.entrypoint}</version>-->
 <!--        </dependency>-->
+
+        <!--
+            if you import openfaas.entrypoint, you might not need guava
+            since guava is imported along with openfaas.entrypoint
+        -->
+        <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>30.0-jre</version>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <!--<artifactId>spring-boot-starter</artifactId> -->

@@ -9,17 +9,16 @@ import com.openfaas.model.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
+//import org.springframework.http.HttpHeaders;
+//import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.io.OutputStream;
+import java.util.*;
 
 
 @Controller
@@ -35,17 +34,21 @@ public class ResponseController {
     }
 
     @RequestMapping(value="/")
-    public ResponseEntity<String> handleGet(HttpServletRequest httpServletRequest){
+    public void handleGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException {
+        //possible alternative return type: ResponseEntity<String>
 
-        String baseURL = httpServletRequest.getRequestURL().toString();
+        String servletPath = httpServletRequest.getServletPath();
+
+        //logger.info("URL : " + httpServletRequest.getRequestURL());           //  http://localhost:8082/
+        //logger.info("Context Path : " + httpServletRequest.getContextPath()); // nothing shows
+        //logger.info("Servlet Path : " + httpServletRequest.getServletPath()); // "/"
+        //if(httpServletRequest.getPathInfo() != null) logger.info("GetPathInfo : " + httpServletRequest.getPathInfo()); // null
         String queryParams = httpServletRequest.getQueryString();
 
         String requestBody = "";
         if(httpServletRequest.getMethod().equalsIgnoreCase("POST")){
             try {
                 // https://stackoverflow.com/questions/8100634/get-the-post-request-body-from-httpservletrequest
-                // Guava's CharStreams is marked as @Beta (unstable)
-                // I am using CharStreams since it is already imported along with Spring framework
                 // Possible alternative: IOUtils.toString(request.getReader());
                 requestBody = CharStreams.toString(httpServletRequest.getReader());
                 logger.info(requestBody);
@@ -76,42 +79,60 @@ public class ResponseController {
                     //      }
                     // }
                     String value = values.nextElement();
-                    logger.info(key + " : " + value);
+                    logger.info("REQ HEADER:" + key + " : " + value);
                     headersMap.put(key, value);
                 }
             }
         }
 
-        IRequest req = new Request(requestBody, headersMap, queryParams, baseURL);
+        HashSet<String> keys1 = (HashSet<String>) httpServletResponse.getHeaderNames();
+        for(String key1 : keys1){
+            logger.info("--->" + key1);
+            logger.info(httpServletResponse.getHeader(key1));
+        }
+
+
+        IRequest req = new Request(requestBody, headersMap, queryParams, servletPath);
 
         IResponse res = this.handler.Handle(req);
 
         String response = res.getBody();
-        HttpHeaders responseHeaders = new HttpHeaders();
+
+        // set content type
         String contentType = res.getContentType();
         if (contentType.length() > 0) {
-            responseHeaders.set("Content-Type", contentType);
+            httpServletResponse.setContentType(contentType);
         }
 
+        // set other headers
         Iterator headersFromHandler = res.getHeaders().entrySet().iterator();
-
         while(headersFromHandler.hasNext()) {
             Map.Entry<String, String> entry = (Map.Entry) headersFromHandler.next();
-            logger.info(entry.getKey() + " = " + entry.getValue());
-            responseHeaders.set(entry.getKey(), entry.getValue());
+            logger.info("RES HEADER:" + entry.getKey() + " = " + entry.getValue());
+            httpServletResponse.setHeader(entry.getKey(), entry.getValue());
         }
 
-        return ResponseEntity
-                .status(res.getStatusCode())
-                .headers(responseHeaders)
-                .body(response);
+        httpServletResponse.setStatus(res.getStatusCode());
+        byte[] bytesOut = response.getBytes("UTF-8");
+        httpServletResponse.setContentLength(bytesOut.length);
+
+        // write out body
+        OutputStream outputStream = httpServletResponse.getOutputStream();
+        outputStream.write(bytesOut);
+        outputStream.flush();
+        outputStream.close();
+
+        // for sending text (not binary)
+        // PrintWriter writer = httpServletResponse.getWriter();
+        // writer.write("dfsfd");
+        // writer.flush();
+
+        // This won't work with Openfaas web ui.. not sure why
+        // This works with faas-cli or insomnia, postman.
+        // However, outstream.flush() is used to send out the response signal to ensure the safe use
+        // return ResponseEntity
+        //          .status(res.getStatusCode())
+        //          .headers(responseHeaders)
+        //          .body(response);
     }
 }
-
-// Extract requestBody, requestHeader, URI from HttpExchange(com.sun.net.httpserver)
-// Translate them into IRequest req(com.openfaas.model)
-// Use Handler.Handle method to produce IResponse res (com.openfaas.model)
-// Attach Header(content-type) to res
-// Attach StatusCode to res
-// Attach Message length to res
-// Send out res
