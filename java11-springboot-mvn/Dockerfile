@@ -1,16 +1,15 @@
 FROM maven:3.6.3-openjdk-11-slim as builder
 
-RUN mkdir -p /home/app/libs
-
-ENV MAVEN_OPTS=""
+# RUN mkdir -p /home/app
 
 WORKDIR /home/app
+
+# ENV MAVEN_OPTS=""
+# https://stackoverflow.com/questions/25621601/what-does-the-maven-opts-environment-variable-do
 
 COPY . /home/app/
 
-WORKDIR /home/app
-
-RUN  mvn clean package -e
+RUN  mvn clean package --no-transfer-progress
 
 FROM openfaas/of-watchdog:0.7.6 as watchdog
 
@@ -23,16 +22,18 @@ RUN addgroup --system app \
     && adduser --system --ingroup app app
 
 COPY --from=watchdog /fwatchdog /usr/bin/fwatchdog
+
 RUN chmod +x /usr/bin/fwatchdog
 
-WORKDIR /home/app
+COPY --from=builder /home/app/function/target/function-1.0.0.jar /home/app/function.jar
 
-COPY --from=builder /home/app/function/target/function-1.0.0.jar ./function.jar
+WORKDIR /home/app
 
 RUN unzip ./function.jar -d function
 
 RUN chown -R app /home/app
-WORKDIR /home/app/
+
+USER app
 
 ENV upstream_url="http://127.0.0.1:8082"
 ENV mode="http"

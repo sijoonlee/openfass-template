@@ -18,14 +18,15 @@ with the customized code for Springframework
 ### Comparison Table
 |                |  Openfaas.App    | Spring.App             |
 |---             |  ---      |   ---             |
-|Handler Instance| @Autowire | Singleton Pattern |
-|Arg             | HttpExchange(com.sun.net.httpserver)|HttpServletRequest(javax.servlet.http)|
+|Handler Instance| Singleton Pattern | @Autowire  |
+|Request through | HttpExchange(com.sun.net.httpserver)|HttpServletRequest(javax.servlet.http)|
+|Response through| HttpExchange(com.sun.net.httpserver)|HttpServletResponse(javax.servlet.http)|
 |Step1           | Extract Req from HttpExchange | Extract Req from HttpServletRequest |
 |Step2           | Instantiate IRequest obj(req) | Instantiate IRequest obj(req) |
 |Step3           | Pass req to Handler.handle()  | Pass req to Handler.handle() |
 |                | Instantiate IResponse res     | Instantiate IResponse res |
 |Step4           | Extract info from res         | Extract info from res |
-|Step5           | Send back using HttpExchange  | Send back using ResponseEntity(org.springframework.http)|
+|Step5           | Send back using HttpExchange  | Send back using HttpServletResponse(javax.servlet.http)|
   
   
 

@@ -85,13 +85,6 @@ public class ResponseController {
             }
         }
 
-        HashSet<String> keys1 = (HashSet<String>) httpServletResponse.getHeaderNames();
-        for(String key1 : keys1){
-            logger.info("--->" + key1);
-            logger.info(httpServletResponse.getHeader(key1));
-        }
-
-
         IRequest req = new Request(requestBody, headersMap, queryParams, servletPath);
 
         IResponse res = this.handler.Handle(req);
@@ -105,15 +98,17 @@ public class ResponseController {
         }
 
         // set other headers
-        Iterator headersFromHandler = res.getHeaders().entrySet().iterator();
-        while(headersFromHandler.hasNext()) {
-            Map.Entry<String, String> entry = (Map.Entry) headersFromHandler.next();
-            logger.info("RES HEADER:" + entry.getKey() + " = " + entry.getValue());
+        for(Map.Entry<String, String> entry : res.getHeaders().entrySet()) {
             httpServletResponse.setHeader(entry.getKey(), entry.getValue());
         }
 
+        // set status code
         httpServletResponse.setStatus(res.getStatusCode());
+
+        // get body
         byte[] bytesOut = response.getBytes("UTF-8");
+
+        // set content length
         httpServletResponse.setContentLength(bytesOut.length);
 
         // write out body
@@ -122,14 +117,14 @@ public class ResponseController {
         outputStream.flush();
         outputStream.close();
 
-        // for sending text (not binary)
+        // -- sending string (not binary) --
         // PrintWriter writer = httpServletResponse.getWriter();
         // writer.write("dfsfd");
         // writer.flush();
 
-        // This won't work with Openfaas web ui.. not sure why
-        // This works with faas-cli or insomnia, postman.
-        // However, outstream.flush() is used to send out the response signal to ensure the safe use
+        // I've tried this way, but this won't work with Openfaas web ui.. not sure why
+        // Although this works with faas-cli or insomnia, postman.
+        // outstream.flush() is used to send out the response signal to ensure it's working in most cases
         // return ResponseEntity
         //          .status(res.getStatusCode())
         //          .headers(responseHeaders)
