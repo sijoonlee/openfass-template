@@ -1,8 +1,6 @@
 FROM maven:3.6.3-openjdk-11-slim as builder
 
-RUN mkdir -p /home/app/libs
-
-ENV MAVEN_OPTS=""
+# ENV MAVEN_OPTS=""
 
 WORKDIR /home/app
 
@@ -10,11 +8,7 @@ COPY . /home/app/
 
 WORKDIR /home/app
 
-RUN ls /home/app/function
-
-RUN  mvn clean package -e
-
-RUN ls /home/app/function
+RUN  mvn clean package --no-transfer-progress
 
 FROM openfaas/of-watchdog:0.7.6 as watchdog
 
