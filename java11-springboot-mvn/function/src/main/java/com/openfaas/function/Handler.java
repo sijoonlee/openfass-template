@@ -9,7 +9,6 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.HashMap;
 import java.util.List;
@@ -20,7 +19,7 @@ public class Handler {
     private static Logger logger = LoggerFactory.getLogger(Handler.class);
 
     @RequestMapping(value="/")
-    public @ResponseBody Map<String, String>  handle(
+    public ResponseEntity<Map<String, String>> handle(
             @RequestParam(required = false) Map<String, String> requestParam,
             RequestEntity<String> requestEntity)  {
 
@@ -37,8 +36,8 @@ public class Handler {
         }
         Request req = new Request(requestEntity.getBody(), headersChopped);
 
-        String bodyFromReq = req.getBody();
+        //String bodyFromReq = req.getBody();
 
-        return responseBody;
+        return ResponseEntity.status(HttpStatus.OK).body(responseBody);
     }
 }
