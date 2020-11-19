@@ -18,35 +18,24 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <openfaas.model>0.1.1</openfaas.model>
-        <openfaas.entrypoint>0.1.0</openfaas.entrypoint>
+<!--        <openfaas.model>0.1.1</openfaas.model>-->
+<!--        <openfaas.entrypoint>0.1.0</openfaas.entrypoint>-->
     </properties>
 
     <dependencies>
 
         <!-- https://mvnrepository.com/artifact/com.openfaas/model -->
-        <dependency>
-            <groupId>com.openfaas</groupId>
-            <artifactId>model</artifactId>
-            <version>${openfaas.model}</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.openfaas</groupId>-->
+<!--            <artifactId>model</artifactId>-->
+<!--            <version>${openfaas.model}</version>-->
+<!--        </dependency>-->
         <!-- https://mvnrepository.com/artifact/com.openfaas/entrypoint -->
 <!--        <dependency>-->
 <!--            <groupId>com.openfaas</groupId>-->
 <!--            <artifactId>entrypoint</artifactId>-->
 <!--            <version>${openfaas.entrypoint}</version>-->
 <!--        </dependency>-->
-
-        <!--
-            if you import openfaas.entrypoint, you might not need guava
-            since guava is imported along with openfaas.entrypoint
-        -->
-        <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>30.0-jre</version>
-        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
