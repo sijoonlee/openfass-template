@@ -1,1 +1,1 @@
-## Template: java11
+## Template: java11 with maven

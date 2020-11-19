@@ -1,6 +1,6 @@
 package com.openfaas.function;
 
-//import com.openfaas.model.Request;
+import com.openfaas.model.Request;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,30 +20,25 @@ public class Handler {
     private static Logger logger = LoggerFactory.getLogger(Handler.class);
 
     @RequestMapping(value="/")
-    public @ResponseBody String handle(
+    public @ResponseBody Map<String, String>  handle(
             @RequestParam(required = false) Map<String, String> requestParam,
             RequestEntity<String> requestEntity)  {
 
-        String uri = requestEntity.getUrl().toString();
-        String method = requestEntity.getMethod().toString();
+        Map<String, String> responseBody = new HashMap<>();
+        responseBody.put("Req URI", requestEntity.getUrl().toString());
+        responseBody.put("Req Method", requestEntity.getHeaders().toString());
+        responseBody.put("Req Params", requestParam.toString());
+        responseBody.put("Req Body", requestEntity.getBody());
+
         Map<String, List<String>> headers = requestEntity.getHeaders();
         Map<String, String> headersChopped= new HashMap<>();
         for(Map.Entry<String, List<String>> entry : headers.entrySet()){
             headersChopped.put(entry.getKey(), entry.getValue().get(0));
         }
-        String params = requestParam.entrySet().toString();
-        String body = requestEntity.getBody();
-        String info =
-                "Req URI: " + uri + "\n" +
-                        "Req Method: " + method + "\n" +
-                        "Req Headers: " + headers + "\n" +
-                        "Req Params: " + params + "\n" +
-                        "Req Body: " + body + "\n";
+        Request req = new Request(requestEntity.getBody(), headersChopped);
 
-        //Request req = new Request(body, headersChopped);
+        String bodyFromReq = req.getBody();
 
-        //String bodyFromReq = req.getBody();
-
-        return info;
+        return responseBody;
     }
 }
